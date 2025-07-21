@@ -16,7 +16,10 @@ INFLUXDB_URL="https://eu-central-1-1.aws.cloud2.influxdata.com/query"
 BUCKET_NAME="db.v0"
 MEASUREMENT_NAME="weather"
 
+TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+mkdir -p .downloaded
 curl ${INFLUXDB_URL} \
   --header "Authorization: Token ${INFLUXDB_TOKEN}" \
   --data-urlencode "db=${BUCKET_NAME}" \
-  --data-urlencode "q=SELECT * FROM ${MEASUREMENT_NAME}"
+  --data-urlencode "q=SELECT * FROM ${MEASUREMENT_NAME}" | \
+  tee .downloaded/latest.json > ".downloaded/${TIMESTAMP}.json"
