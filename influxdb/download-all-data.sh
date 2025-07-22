@@ -1,5 +1,8 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
 if [ -f .env ]; then
   INFLUXDB_TOKEN=$(grep "^INFLUXDB_TOKEN=" .env | cut -d '=' -f2-)
 else
