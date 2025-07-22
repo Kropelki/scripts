@@ -21,8 +21,11 @@ MEASUREMENT_NAME="weather"
 
 TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
 mkdir -p .downloaded
+
+# https://docs.influxdata.com/influxdb3/core/query-data/execute-queries/influxdb-v1-api/
 curl ${INFLUXDB_URL} \
   --header "Authorization: Token ${INFLUXDB_TOKEN}" \
   --data-urlencode "db=${BUCKET_NAME}" \
+  --data-urlencode "epoch=s" \
   --data-urlencode "q=SELECT * FROM ${MEASUREMENT_NAME}" | \
   tee .downloaded/latest.json > ".downloaded/${TIMESTAMP}.json"
