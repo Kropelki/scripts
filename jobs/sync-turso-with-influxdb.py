@@ -75,28 +75,36 @@ def extract_weather_data(data: Dict[str, Any]) -> List[Dict[str, Any]]:
 def create_insert_statements(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     statements = []
 
+    main_fields = ["temperature", "humidity", "pressure", "illumination"]
+    optional_fields = ["dew_point", "solar_voltage", "battery_voltage"]
+
     for record in records:
-        # TODO(FIXME): handle a situation when a record is missing some fields
-        sql = """
-        INSERT OR REPLACE INTO weather
-        (timestamp, temperature, humidity, pressure, illumination, dew_point, solar_voltage, battery_voltage)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """
+        # The illumination sensor was not working before this timestamp (1753429449),
+        # so any value (including -100 or 0) should be treated as missing (null).
+        # After this timestamp, the station started sending null for missing illumination.
+        # https://github.com/Kropelki/firmware/pull/17
+        ILLUMINATION_NULL_TIMESTAMP = 1753429449
+        if (
+            "timestamp" in record
+            and int(record["timestamp"]) < ILLUMINATION_NULL_TIMESTAMP
+        ):
+            record["illumination"] = None
 
-        args = [
-            {"type": "integer", "value": str(int(record.get("timestamp", 0)))},
-            {"type": "float", "value": float(record.get("temperature", 0.0))},
-            {"type": "float", "value": float(record.get("humidity", 0.0))},
-            {"type": "float", "value": float(record.get("pressure", 0.0))},
-            {"type": "float", "value": float(record.get("illumination", 0.0))},
-            {"type": "float", "value": float(record.get("dew_point", 0.0))},
-            {"type": "float", "value": float(record.get("solar_voltage", 0.0))},
-            {"type": "float", "value": float(record.get("battery_voltage", 0.0))},
-        ]
+        # we generally don't want to send data if we don't have at least one sensor reading:
+        # https://github.com/Kropelki/firmware/commit/038cdb3d0bab577793d23557cec6467a65d7ac9b
+        if not any(record.get(field) is not None for field in main_fields):
+            continue
 
-        statements.append(
-            {"type": "execute", "stmt": {"sql": sql.strip(), "args": args}}
-        )
+        columns = ["timestamp"]
+        values = [{"type": "integer", "value": str(int(record["timestamp"]))}]
+
+        for field in main_fields + optional_fields:
+            if record.get(field) is not None:
+                columns.append(field)
+                values.append({"type": "float", "value": float(record[field])})
+
+        sql = f"INSERT OR REPLACE INTO weather ({', '.join(columns)}) VALUES ({', '.join(['?' for _ in columns])})"
+        statements.append({"type": "execute", "stmt": {"sql": sql, "args": values}})
 
     return statements
 
