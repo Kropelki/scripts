@@ -35,6 +35,9 @@ def main():
     if not TURSO_AUTH_TOKEN:
         return print("Error: TURSO_AUTH_TOKEN environment variable not set")
 
+    print(f"[TURSO_DATABASE_URL]: {TURSO_DATABASE_URL}")
+    print(f"[JSON_FILE]: {JSON_FILE}")
+
     # From the docs:
     # > You must append to the Base URL the actual pipeline URL that accepts requests — /v2/pipeline.
     if not TURSO_DATABASE_URL.endswith("/v2/pipeline"):
@@ -43,32 +46,29 @@ def main():
         else:
             TURSO_DATABASE_URL += "/v2/pipeline"
 
-    print(f"Loading data from: {JSON_FILE}")
-
     json_data = load_json_data(JSON_FILE)
     weather_records = extract_weather_data(json_data)
 
     if not weather_records:
         return print("No weather data found in the JSON file")
-    print(f"Found {len(weather_records)} weather records")
+    print(f"Found {len(weather_records)} weather records in the JSON file")
 
     insert_statements = create_insert_statements(
         weather_records, TURSO_DATABASE_URL, TURSO_AUTH_TOKEN
     )
 
     if not insert_statements:
-        print("No new or changed records to sync.")
+        print("No new or changed records to sync")
         return
 
-    print(f"Prepared {len(insert_statements)} insert statements for Turso database.")
-    print("You can review the statements before sending them.")
+    print(f"Prepared {len(insert_statements)} insert statements for Turso database")
     should_send = (
         input("Do you want to send these statements to the Turso database? (yes/no): ")
         .strip()
         .lower()
     )
     if should_send not in ["yes", "YES"]:
-        print("Data import cancelled by user.")
+        print("Data import cancelled by user")
         return
     print("Sending data to Turso database...")
     success = send_to_turso(insert_statements, TURSO_DATABASE_URL, TURSO_AUTH_TOKEN)

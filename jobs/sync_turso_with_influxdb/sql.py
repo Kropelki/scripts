@@ -16,7 +16,7 @@ def create_insert_statements(
     ]
     existing_data = fetch_existing_turso_data(timestamps, database_url, auth_token)
 
-    print(f"Found {len(existing_data)} existing records in database for comparison")
+    print(f"Found {len(existing_data)} existing records in the database for given timestamps")
 
     for record in records:
         # The illumination sensor was not working before this timestamp (1753429449),
