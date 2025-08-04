@@ -6,6 +6,7 @@ from sync_turso_with_influxdb.utils import records_are_equal
 def create_insert_statements(
     records: List[Dict[str, Any]], database_url: str, auth_token: str
 ) -> List[Dict[str, Any]]:
+    """Creates SQL insert statements for the Turso database for given records."""
     statements = []
 
     main_fields = ["temperature", "humidity", "pressure", "illumination"]

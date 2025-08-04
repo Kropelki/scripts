@@ -3,6 +3,7 @@ from typing import Dict, Any
 
 
 def load_json_data(file_path: str) -> Dict[str, Any]:
+    """Loads JSON data from a file. Handles some common errors."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -13,6 +14,7 @@ def load_json_data(file_path: str) -> Dict[str, Any]:
 
 
 def records_are_equal(record1: Dict[str, Any], record2: Dict[str, Any]) -> bool:
+    """Compares two records for equality, ignoring None values."""
     all_fields = [
         "temperature",
         "humidity",

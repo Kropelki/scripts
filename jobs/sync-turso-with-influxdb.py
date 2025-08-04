@@ -24,6 +24,19 @@ JSON_FILE = pathlib.Path(SCRIPT_DIR, "../influxdb/.downloaded/latest.json").reso
 
 
 def main():
+    """
+    Syncs weather data from JSON file to Turso database.
+
+    The JSON file is expected to be in the format returned by InfluxDB query containing weather data.
+    The script will read the JSON file, extract weather records, create SQL insert statements,
+    and send them to the Turso database. It will also handle existing records to avoid duplicates.
+
+    Since we are using the `INSERT OR REPLACE` statement, it will update existing records if
+    they have the same timestamp and different values, or insert new records if they do not exist.
+
+    The script only syncs records from the last 30 days, because a free InfluxDB account only allows
+    for maximum 30 days of data retention (meaning that any data older than that gets deleted).
+    """
     load_dotenv()
 
     TURSO_DATABASE_URL = os.getenv("TURSO_DATABASE_URL")
