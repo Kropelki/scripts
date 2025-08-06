@@ -64,7 +64,6 @@ def main():
 
     if not weather_records:
         return print("No weather data found in the JSON file")
-    print(f"Found {len(weather_records)} weather records in the JSON file")
 
     insert_statements = create_insert_statements(weather_records, TURSO_DATABASE_URL, TURSO_AUTH_TOKEN)
 

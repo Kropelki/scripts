@@ -1,5 +1,7 @@
 from typing import List, Dict, Any
 
+from sync_turso_with_influxdb.utils import _convert_timestamp_to_unix
+
 
 def extract_weather_data(data: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Extracts weather records from the InfluxDB query result saved in JSON format."""
@@ -30,7 +32,15 @@ def extract_weather_data(data: Dict[str, Any]) -> List[Dict[str, Any]]:
                         for i, column in enumerate(columns):
                             if column in column_map and i < len(row):
                                 db_column = column_map[column]
-                                record[db_column] = row[i]
+                                value = row[i]
+
+                                if db_column == "timestamp" and value is not None:
+                                    try:
+                                        value = _convert_timestamp_to_unix(value)
+                                    except ValueError as e:
+                                        raise ValueError(f"Invalid timestamp value: {value}") from e
+
+                                record[db_column] = value
 
                         if record:
                             weather_records.append(record)
