@@ -1,5 +1,6 @@
 from typing import List, Dict, Any
 
+
 def extract_weather_data(data: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Extracts weather records from the InfluxDB query result saved in JSON format."""
     weather_records = []

@@ -4,9 +4,7 @@ import urllib.request
 from typing import List, Dict, Any, Optional
 
 
-def _create_turso_request(
-    payload: Dict[str, Any], database_url: str, auth_token: str
-) -> urllib.request.Request:
+def _create_turso_request(payload: Dict[str, Any], database_url: str, auth_token: str) -> urllib.request.Request:
     """Creates an HTTP request for Turso API."""
     # https://docs.turso.tech/sdk/http/quickstart
     data = json.dumps(payload).encode("utf-8")
@@ -67,9 +65,7 @@ def _parse_query_result(result: Dict[str, Any]) -> Dict[int, Dict[str, Any]]:
     return existing_records
 
 
-def send_to_turso(
-    sql_statements: List[Dict[str, Any]], database_url: str, auth_token: str
-) -> bool:
+def send_to_turso(sql_statements: List[Dict[str, Any]], database_url: str, auth_token: str) -> bool:
     """Sends prepared SQL statements to the Turso database. Returns True if successful."""
     payload = {"requests": sql_statements + [{"type": "close"}]}
     request = _create_turso_request(payload, database_url, auth_token)
@@ -91,9 +87,7 @@ def send_to_turso(
         return False
 
 
-def fetch_existing_turso_data(
-    timestamps: List[int], database_url: str, auth_token: str
-) -> Dict[int, Dict[str, Any]]:
+def fetch_existing_turso_data(timestamps: List[int], database_url: str, auth_token: str) -> Dict[int, Dict[str, Any]]:
     """Fetches existing records from the Turso database for given timestamps."""
     if not timestamps:
         return {}
@@ -102,9 +96,7 @@ def fetch_existing_turso_data(
     max_timestamp = max(timestamps)
 
     query = f"SELECT * FROM weather WHERE timestamp >= {min_timestamp} AND timestamp <= {max_timestamp}"
-    payload = {
-        "requests": [{"type": "execute", "stmt": {"sql": query}}, {"type": "close"}]
-    }
+    payload = {"requests": [{"type": "execute", "stmt": {"sql": query}}, {"type": "close"}]}
 
     req = _create_turso_request(payload, database_url, auth_token)
     result = _execute_turso_request(req)

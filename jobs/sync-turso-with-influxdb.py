@@ -66,20 +66,14 @@ def main():
         return print("No weather data found in the JSON file")
     print(f"Found {len(weather_records)} weather records in the JSON file")
 
-    insert_statements = create_insert_statements(
-        weather_records, TURSO_DATABASE_URL, TURSO_AUTH_TOKEN
-    )
+    insert_statements = create_insert_statements(weather_records, TURSO_DATABASE_URL, TURSO_AUTH_TOKEN)
 
     if not insert_statements:
         print("No new or changed records to sync")
         return
 
     print(f"Prepared {len(insert_statements)} insert statements for Turso database")
-    should_send = (
-        input("Do you want to send these statements to the Turso database? (yes/no): ")
-        .strip()
-        .lower()
-    )
+    should_send = input("Do you want to send these statements to the Turso database? (yes/no): ").strip().lower()
     if should_send not in ["yes", "YES"]:
         print("Data import cancelled by user")
         return
