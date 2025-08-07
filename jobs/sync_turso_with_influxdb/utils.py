@@ -1,4 +1,6 @@
 import json
+import pathlib
+
 from datetime import datetime
 from typing import Dict, Any
 
@@ -123,3 +125,34 @@ def records_are_equal(record1: Dict[str, Any], record2: Dict[str, Any]) -> bool:
             return False
 
     return True
+
+
+def resolve_json_file_path(args: list[str]) -> str | None:
+    """Handles command line arguments to allow specifying a JSON file."""
+    SCRIPT_DIR = pathlib.Path(__file__).parent.resolve()
+    LATEST_JSON_FILE = pathlib.Path(SCRIPT_DIR, "../../influxdb/.downloaded/latest.json").resolve()
+
+    if len(args) > 1:
+        if args[1] == "-i":
+            downloaded_dir = pathlib.Path(SCRIPT_DIR, "../../influxdb/.downloaded").resolve()
+            downloaded_files = list(downloaded_dir.glob("*.json"))
+
+            if not downloaded_files:
+                print("No JSON files found in the downloaded directory")
+                return None
+
+            for i, json_file in enumerate(downloaded_files):
+                print(f"{f'[{i}]':>4} - {json_file.name}")
+            chosen_file_index = input("Enter the index of the JSON file to use: ")
+
+            try:
+                return pathlib.Path(
+                    SCRIPT_DIR, "../../influxdb/.downloaded", downloaded_files[int(chosen_file_index)].name
+                ).resolve()
+            except (ValueError, IndexError):
+                print("Invalid index - using default JSON file")
+
+    if not LATEST_JSON_FILE.exists():
+        print(f"Failed to find the latest JSON file at {LATEST_JSON_FILE}")
+        return None
+    return LATEST_JSON_FILE

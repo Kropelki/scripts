@@ -10,17 +10,14 @@ What env varables are needed: TURSO_AUTH_TOKEN && TURSO_DATABASE_URL
 """
 
 import os
-import pathlib
+import sys
 
 from dotenv import load_dotenv
 
 from sync_turso_with_influxdb.influx import extract_weather_data
 from sync_turso_with_influxdb.sql import create_insert_statements
 from sync_turso_with_influxdb.turso import send_to_turso
-from sync_turso_with_influxdb.utils import load_json_data
-
-SCRIPT_DIR = pathlib.Path(__file__).parent.resolve()
-JSON_FILE = pathlib.Path(SCRIPT_DIR, "../influxdb/.downloaded/latest.json").resolve()
+from sync_turso_with_influxdb.utils import load_json_data, resolve_json_file_path
 
 
 def main():
@@ -37,6 +34,9 @@ def main():
     The script only syncs records from the last 30 days, because a free InfluxDB account only allows
     for maximum 30 days of data retention (meaning that any data older than that gets deleted).
     """
+    JSON_FILE = resolve_json_file_path(sys.argv)
+    if JSON_FILE is None:
+        return print("Aborting: No JSON file specified or found")
     load_dotenv()
 
     TURSO_DATABASE_URL = os.getenv("TURSO_DATABASE_URL")
