@@ -17,6 +17,13 @@ VALID_SENSOR_RANGES = {
     "illumination": (0.0, 65535.0),  # lux
 }
 
+# Fields that are accepted without range validation (only basic type checking)
+UNVALIDATED_FIELDS = {
+    "dew_point",
+    "solar_voltage",
+    "battery_voltage",
+}
+
 
 def _convert_timestamp_to_unix(timestamp) -> int:
     """
@@ -61,11 +68,13 @@ def _is_valid_sensor_reading(field: str, value: Any) -> bool:
     except (ValueError, TypeError):
         return False
 
-    if field not in VALID_SENSOR_RANGES:
+    if field in VALID_SENSOR_RANGES:
+        min_val, max_val = VALID_SENSOR_RANGES[field]
+        return min_val <= value <= max_val
+    elif field in UNVALIDATED_FIELDS:
+        return True  # accept any valid numeric value for these fields
+    else:
         return False  # treat unknown fields as invalid since we don't know their ranges
-
-    min_val, max_val = VALID_SENSOR_RANGES[field]
-    return min_val <= value <= max_val
 
 
 def prepare_weather_record(record: Dict[str, Any]) -> Dict[str, Any] | None:
