@@ -25,7 +25,7 @@ UNVALIDATED_FIELDS = {
 }
 
 
-def _convert_timestamp_to_unix(timestamp) -> int:
+def convert_timestamp_to_unix(timestamp) -> int:
     """
     Converts a timestamp to Unix timestamp (seconds since epoch).
 
@@ -42,17 +42,20 @@ def _convert_timestamp_to_unix(timestamp) -> int:
         return int(timestamp)
 
     if isinstance(timestamp, str):
-        try:  # try to convert directly to int first
-            return int(timestamp)
-        except ValueError:
-            pass
-
         try:  # try to parse ISO 8601 format
             if timestamp.endswith("Z"):
                 timestamp = timestamp[:-1]
-            return int(datetime.fromisoformat(timestamp).timestamp())  # in seconds
+
+            # If fractional seconds are longer than 6 digits, truncate to microseconds
+            if "." in timestamp:
+                date_part, frac_part = timestamp.split(".", 1)
+                if len(frac_part) > 6:
+                    frac_part = frac_part[:6]
+                timestamp = f"{date_part}.{frac_part}"
+
+            return int(datetime.fromisoformat(timestamp).timestamp())  # seconds
         except ValueError:
-            pass
+            raise ValueError(f"Invalid ISO 8601 timestamp: {timestamp}")
 
     raise ValueError(f"Unrecognized timestamp format: {timestamp} (type: {type(timestamp)})")
 

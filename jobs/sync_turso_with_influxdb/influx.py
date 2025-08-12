@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 
-from sync_turso_with_influxdb.utils import _convert_timestamp_to_unix
+from sync_turso_with_influxdb.utils import convert_timestamp_to_unix
 
 
 def extract_weather_data(data: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -36,7 +36,7 @@ def extract_weather_data(data: Dict[str, Any]) -> List[Dict[str, Any]]:
 
                                 if db_column == "timestamp" and value is not None:
                                     try:
-                                        value = _convert_timestamp_to_unix(value)
+                                        value = convert_timestamp_to_unix(value)
                                     except ValueError as e:
                                         raise ValueError(f"Invalid timestamp value: {value}") from e
 
