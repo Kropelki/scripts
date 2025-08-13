@@ -18,6 +18,7 @@ from sync_turso_with_influxdb.influx import extract_weather_data
 from sync_turso_with_influxdb.sql import create_insert_statements
 from sync_turso_with_influxdb.turso import send_to_turso
 from sync_turso_with_influxdb.utils import load_json_data, resolve_json_file_path
+from sync_turso_with_influxdb.report import generate_diff_report, save_report_to_file
 
 
 def main():
@@ -65,13 +66,25 @@ def main():
     if not weather_records:
         return print("No weather data found in the JSON file")
 
-    insert_statements = create_insert_statements(weather_records, TURSO_DATABASE_URL, TURSO_AUTH_TOKEN)
+    insert_statements, existing_data = create_insert_statements(weather_records, TURSO_DATABASE_URL, TURSO_AUTH_TOKEN)
 
     if not insert_statements:
         print("No new or changed records to sync")
         return
 
     print(f"Prepared {len(insert_statements)} insert statements for Turso database")
+
+    print("Generating diff report...")
+    report_content = generate_diff_report(weather_records, insert_statements, existing_data)
+    save_report = input("Do you want to save this report to jobs/.reports/? (yes/no): ").strip().lower()
+    if save_report in ["yes", "YES"]:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        report_path = save_report_to_file(report_content, script_dir)
+        if report_path:
+            print(f"Report saved to: {report_path}")
+        else:
+            print("Failed to save report")
+
     should_send = input("Do you want to send these statements to the Turso database? (yes/no): ").strip().lower()
     if should_send not in ["yes", "YES"]:
         print("Data import cancelled by user")

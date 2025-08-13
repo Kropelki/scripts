@@ -4,8 +4,14 @@ from sync_turso_with_influxdb.turso import fetch_existing_turso_data
 from sync_turso_with_influxdb.utils import records_are_equal, prepare_weather_record
 
 
-def create_insert_statements(records: List[Dict[str, Any]], database_url: str, auth_token: str) -> List[Dict[str, Any]]:
-    """Creates SQL insert statements for the Turso database for given records."""
+def create_insert_statements(
+    records: List[Dict[str, Any]], database_url: str, auth_token: str
+) -> tuple[List[Dict[str, Any]], Dict[int, Dict[str, Any]]]:
+    """Creates SQL insert statements for the Turso database for given records.
+
+    Returns:
+        Tuple of (statements, existing_data) where existing_data is keyed by timestamp
+    """
     statements = []
 
     main_fields = ["temperature", "humidity", "pressure", "illumination"]
@@ -64,4 +70,4 @@ def create_insert_statements(records: List[Dict[str, Any]], database_url: str, a
     if unchanged_skipped > 0:
         print(f"Skipped {unchanged_skipped} unchanged records")
 
-    return statements
+    return statements, existing_data
