@@ -1,7 +1,7 @@
 import json
 import pathlib
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any
 
 # BMP280 (pressure):
@@ -53,7 +53,9 @@ def convert_timestamp_to_unix(timestamp) -> int:
                     frac_part = frac_part[:6]
                 timestamp = f"{date_part}.{frac_part}"
 
-            return int(datetime.fromisoformat(timestamp).timestamp())  # seconds
+            # Parse as UTC to ensure GMT output regardless of local timezone
+            dt = datetime.fromisoformat(timestamp).replace(tzinfo=timezone.utc)
+            return int(dt.timestamp())  # seconds
         except ValueError:
             raise ValueError(f"Invalid ISO 8601 timestamp: {timestamp}")
 
