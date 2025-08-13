@@ -1,6 +1,6 @@
-# misc
+# scripts
 
-A collection of miscellaneous temporary data and scripts.
+A collection of scripts useful for managing and syncing weather data for the [Kropelki](https://github.com/Kropelki) project.
 
 ## `/influxdb`
 
