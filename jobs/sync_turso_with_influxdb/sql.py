@@ -34,6 +34,15 @@ def create_insert_statements(
         if "timestamp" in original_record and int(original_record["timestamp"]) < ILLUMINATION_NULL_TIMESTAMP:
             original_record["illumination"] = None
 
+        # The UV sensor started sending invalid values after this timestamp,
+        # so we treat any UV voltage value as missing (null) from this point onward.
+        # TODO: set proper stop timestamp when the UV sensor is fixed
+        UV_VOLTAGE_NULL_START_TIMESTAMP = 1764134696  # 2025-11-26T05:24:56Z
+        # UV_VOLTAGE_NULL_STOP_TIMESTAMP = 0
+
+        if "uv_voltage" in original_record and int(original_record["timestamp"]) >= UV_VOLTAGE_NULL_START_TIMESTAMP:
+            original_record["uv_voltage"] = None
+
         record = prepare_weather_record(original_record)  # sanitizes and validates in one step
         if record is None:
             skipped_invalid += 1
