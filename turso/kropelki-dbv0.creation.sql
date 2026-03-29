@@ -6,7 +6,8 @@ CREATE TABLE `weather` (
 	`illumination` real,
 	`dew_point` real,
 	`solar_voltage` real,
-	`battery_voltage` real
+	`battery_voltage` real,
+    `uv_voltage` real
 );
 
 CREATE INDEX `idx_timestamp` ON `weather` (`timestamp`);
