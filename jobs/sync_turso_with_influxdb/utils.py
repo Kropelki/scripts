@@ -153,7 +153,7 @@ def resolve_json_file_path(args: list[str]) -> str | None:
     if len(args) > 1:
         if args[1] == "-i":
             downloaded_dir = pathlib.Path(SCRIPT_DIR, "../../influxdb/.downloaded").resolve()
-            downloaded_files = list(downloaded_dir.glob("*.json"))
+            downloaded_files = sorted(downloaded_dir.glob("*.json"))
 
             if not downloaded_files:
                 print("No JSON files found in the downloaded directory")
