@@ -10,11 +10,14 @@ from typing import Dict, Any
 #   https://static.maritex.eu/file/display/RNvX5GenZti93oVcmXPk9n_PKbFzX2F0/AHT20.pdf
 # BH1750 (illumination):
 #   https://www.handsontec.com/dataspecs/sensor/BH1750%20Light%20Sensor.pdf
+# GUVA-S12SD (UV voltage):
+#   https://cdn-shop.adafruit.com/datasheets/1918guva.pdf
 VALID_SENSOR_RANGES = {
     "temperature": (-40.0, 85.0),  # Celsius
     "humidity": (0.0, 100.0),  # percentage
     "pressure": (300.0, 1100.0),  # hPa
     "illumination": (0.0, 65535.0),  # lux
+    "uv_voltage": (0.0, 5.0),  # volts
 }
 
 # Fields that are accepted without range validation (only basic type checking)
@@ -97,7 +100,7 @@ def prepare_weather_record(record: Dict[str, Any]) -> Dict[str, Any] | None:
     # Then validate: check if we have at least one valid main sensor reading
     # Similar to Measurement::hasSensorData() from the firmware:
     # https://github.com/Kropelki/firmware/blob/24204939d829b84a7638a889c41294f559c0bc4b/src/measurement.cpp#L51-L55
-    main_fields = ["temperature", "humidity", "pressure", "illumination"]
+    main_fields = ["temperature", "humidity", "pressure", "illumination", "uv_voltage"]
     has_valid_main_sensor_data = any(sanitized_record.get(field) is not None for field in main_fields)
 
     return sanitized_record if has_valid_main_sensor_data else None
@@ -124,6 +127,7 @@ def records_are_equal(record1: Dict[str, Any], record2: Dict[str, Any]) -> bool:
         "dew_point",
         "solar_voltage",
         "battery_voltage",
+        "uv_voltage",
     ]
 
     for field in all_fields:

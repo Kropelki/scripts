@@ -14,7 +14,7 @@ def create_insert_statements(
     """
     statements = []
 
-    main_fields = ["temperature", "humidity", "pressure", "illumination"]
+    main_fields = ["temperature", "humidity", "pressure", "illumination", "uv_voltage"]
     optional_fields = ["dew_point", "solar_voltage", "battery_voltage"]
 
     timestamps = [int(record["timestamp"]) for record in records if "timestamp" in record]

@@ -25,6 +25,7 @@ def extract_weather_data(data: Dict[str, Any]) -> List[Dict[str, Any]]:
                         "pressure": "pressure",
                         "solar_panel_voltage": "solar_voltage",
                         "temperature": "temperature",
+                        "uv_voltage": "uv_voltage",
                     }
 
                     for row in values:
