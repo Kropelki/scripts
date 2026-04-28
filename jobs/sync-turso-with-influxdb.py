@@ -77,7 +77,7 @@ def main():
     print("Generating diff report...")
     report_content = generate_diff_report(weather_records, insert_statements, existing_data)
     save_report = input("Do you want to save this report to jobs/.reports/? (yes/no): ").strip().lower()
-    if save_report in ["yes", "YES"]:
+    if save_report in ["yes", "y"]:
         script_dir = os.path.dirname(os.path.abspath(__file__))
         report_path = save_report_to_file(report_content, script_dir)
         if report_path:
@@ -86,7 +86,7 @@ def main():
             print("Failed to save report")
 
     should_send = input("Do you want to send these statements to the Turso database? (yes/no): ").strip().lower()
-    if should_send not in ["yes", "YES"]:
+    if should_send not in ["yes", "y"]:
         print("Data import cancelled by user")
         return
     print("Sending data to Turso database...")
