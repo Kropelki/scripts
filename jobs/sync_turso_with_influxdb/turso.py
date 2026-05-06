@@ -95,8 +95,12 @@ def fetch_existing_turso_data(timestamps: List[int], database_url: str, auth_tok
     min_timestamp = min(timestamps)
     max_timestamp = max(timestamps)
 
-    query = f"SELECT * FROM weather WHERE timestamp >= {min_timestamp} AND timestamp <= {max_timestamp}"
-    payload = {"requests": [{"type": "execute", "stmt": {"sql": query}}, {"type": "close"}]}
+    query = "SELECT * FROM weather WHERE timestamp >= ? AND timestamp <= ?"
+    args = [
+        {"type": "integer", "value": str(min_timestamp)},
+        {"type": "integer", "value": str(max_timestamp)},
+    ]
+    payload = {"requests": [{"type": "execute", "stmt": {"sql": query, "args": args}}, {"type": "close"}]}
 
     req = _create_turso_request(payload, database_url, auth_token)
     result = _execute_turso_request(req)
