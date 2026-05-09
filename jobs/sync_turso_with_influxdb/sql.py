@@ -3,6 +3,20 @@ from typing import List, Dict, Any
 from sync_turso_with_influxdb.turso import fetch_existing_turso_data
 from sync_turso_with_influxdb.utils import records_are_equal, prepare_weather_record
 
+# The illumination sensor was not working before this timestamp (1753429449),
+# so any value (including -100 or 0) should be treated as missing (null).
+# After this timestamp, the station started sending null for missing illumination.
+# https://github.com/Kropelki/firmware/pull/17
+ILLUMINATION_NULL_TIMESTAMP = 1753429449
+
+# The UV sensor started sending invalid values after this timestamp,
+# so we treat any UV voltage value as missing (null) from this point onward.
+# TODO: set proper stop timestamp when the UV sensor is fixed
+UV_VOLTAGE_NULL_START_TIMESTAMP = 1764134696  # 2025-11-26T05:24:56Z
+# UV_VOLTAGE_NULL_STOP_TIMESTAMP = 0
+
+# TODO: just store an array of invalid timestamps for each sensor
+
 
 def create_insert_statements(
     raw_records: List[Dict[str, Any]], turso_database_url: str, turso_auth_token: str
@@ -30,20 +44,8 @@ def create_insert_statements(
     for raw_record in raw_records:
         record = dict(raw_record)  # copy to avoid mutating the original
 
-        # The illumination sensor was not working before this timestamp (1753429449),
-        # so any value (including -100 or 0) should be treated as missing (null).
-        # After this timestamp, the station started sending null for missing illumination.
-        # https://github.com/Kropelki/firmware/pull/17
-        ILLUMINATION_NULL_TIMESTAMP = 1753429449
         if "timestamp" in record and int(record["timestamp"]) < ILLUMINATION_NULL_TIMESTAMP:
             record["illumination"] = None
-
-        # The UV sensor started sending invalid values after this timestamp,
-        # so we treat any UV voltage value as missing (null) from this point onward.
-        # TODO: set proper stop timestamp when the UV sensor is fixed
-        UV_VOLTAGE_NULL_START_TIMESTAMP = 1764134696  # 2025-11-26T05:24:56Z
-        # UV_VOLTAGE_NULL_STOP_TIMESTAMP = 0
-
         if "uv_voltage" in record and int(record["timestamp"]) >= UV_VOLTAGE_NULL_START_TIMESTAMP:
             record["uv_voltage"] = None
 
