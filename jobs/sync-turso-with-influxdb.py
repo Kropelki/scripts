@@ -37,17 +37,20 @@ def main():
     """
     JSON_FILE = resolve_json_file_path(sys.argv)
     if JSON_FILE is None:
-        return print("Aborting: No JSON file specified or found")
+        print("Aborting: No JSON file specified or found")
+        sys.exit(1)
     load_dotenv()
 
     TURSO_DATABASE_URL = os.getenv("TURSO_DATABASE_URL")
     TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN")
 
     if not TURSO_DATABASE_URL:
-        return print("Error: TURSO_DATABASE_URL environment variable not set")
+        print("Error: TURSO_DATABASE_URL environment variable not set")
+        sys.exit(1)
 
     if not TURSO_AUTH_TOKEN:
-        return print("Error: TURSO_AUTH_TOKEN environment variable not set")
+        print("Error: TURSO_AUTH_TOKEN environment variable not set")
+        sys.exit(1)
 
     print(f"[TURSO_DATABASE_URL]: {TURSO_DATABASE_URL}")
     print(f"[JSON_FILE]: {JSON_FILE}")
@@ -61,10 +64,14 @@ def main():
             TURSO_DATABASE_URL += "/v2/pipeline"
 
     json_data = load_json_data(JSON_FILE)
+    if json_data is None:
+        print("Aborting: Failed to load JSON data")
+        sys.exit(1)
     weather_records = extract_weather_data(json_data)
 
     if not weather_records:
-        return print("No weather data found in the JSON file")
+        print("No weather data found in the JSON file")
+        sys.exit(1)
 
     insert_statements, existing_data = create_insert_statements(weather_records, TURSO_DATABASE_URL, TURSO_AUTH_TOKEN)
 
@@ -94,8 +101,10 @@ def main():
 
     if success:
         print("Data import completed successfully!")
+        return
     else:
-        return print("Failed to import data to Turso database")
+        print("Failed to import data to Turso database")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
