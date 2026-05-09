@@ -2,7 +2,7 @@ import json
 import pathlib
 
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Any
 
 # BMP280 (pressure):
 #   https://www.alldatasheet.com/datasheet-pdf/view/1132069/BOSCH/BMP280.html
@@ -85,7 +85,7 @@ def _is_valid_sensor_reading(field: str, value: Any) -> bool:
         return False  # treat unknown fields as invalid since we don't know their ranges
 
 
-def prepare_weather_record(record: Dict[str, Any]) -> Dict[str, Any] | None:
+def prepare_weather_record(record: dict[str, Any]) -> dict[str, Any] | None:
     """
     Sanitizes a weather record by converting invalid sensor readings to None,
     then validates if at least one main sensor reading is valid.
@@ -106,18 +106,20 @@ def prepare_weather_record(record: Dict[str, Any]) -> Dict[str, Any] | None:
     return sanitized_record if has_valid_main_sensor_data else None
 
 
-def load_json_data(file_path: str) -> Dict[str, Any]:
+def load_json_data(file_path: str) -> dict[str, Any] | None:
     """Loads JSON data from a file. Handles some common errors."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
         print(f"Error: File '{file_path}' not found")
+        return None
     except json.JSONDecodeError as e:
         print(f"Error: Invalid JSON in file '{file_path}': {e}")
+        return None
 
 
-def records_are_equal(record1: Dict[str, Any], record2: Dict[str, Any]) -> bool:
+def records_are_equal(record1: dict[str, Any], record2: dict[str, Any]) -> bool:
     """Compares two records for equality, ignoring None values."""
     all_fields = [
         "temperature",
