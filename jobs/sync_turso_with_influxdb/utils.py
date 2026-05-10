@@ -12,12 +12,18 @@ from typing import Any
 #   https://www.handsontec.com/dataspecs/sensor/BH1750%20Light%20Sensor.pdf
 # GUVA-S12SD (UV voltage):
 #   https://cdn-shop.adafruit.com/datasheets/1918guva.pdf
+# SPS30 (particulate matter):
+#   https://sensirion.com/media/documents/8600FF88/64A3B8D6/Sensirion_PM_Sensors_Datasheet_SPS30.pdf
+
 VALID_SENSOR_RANGES = {
     "temperature": (-40.0, 85.0),  # Celsius
     "humidity": (0.0, 100.0),  # percentage
     "pressure": (300.0, 1100.0),  # hPa
     "illumination": (0.0, 65535.0),  # lux
     "uv_voltage": (0.0, 5.0),  # volts
+    "mc_pm1_0": (0.0, 10000.0),  # µg/m³
+    "mc_pm2_5": (0.0, 10000.0),  # µg/m³
+    "mc_pm10_0": (0.0, 10000.0),  # µg/m³
 }
 
 # Fields that are accepted without range validation (only basic type checking)
@@ -100,7 +106,16 @@ def prepare_weather_record(record: dict[str, Any]) -> dict[str, Any] | None:
     # Then validate: check if we have at least one valid main sensor reading
     # Similar to Measurement::hasSensorData() from the firmware:
     # https://github.com/Kropelki/firmware/blob/24204939d829b84a7638a889c41294f559c0bc4b/src/measurement.cpp#L51-L55
-    main_fields = ["temperature", "humidity", "pressure", "illumination", "uv_voltage"]
+    main_fields = [
+        "temperature",
+        "humidity",
+        "pressure",
+        "illumination",
+        "uv_voltage",
+        "mc_pm1_0",
+        "mc_pm2_5",
+        "mc_pm10_0",
+    ]
     has_valid_main_sensor_data = any(sanitized_record.get(field) is not None for field in main_fields)
 
     return sanitized_record if has_valid_main_sensor_data else None
@@ -130,6 +145,9 @@ def records_are_equal(record1: dict[str, Any], record2: dict[str, Any]) -> bool:
         "solar_voltage",
         "battery_voltage",
         "uv_voltage",
+        "mc_pm1_0",
+        "mc_pm2_5",
+        "mc_pm10_0",
     ]
 
     for field in all_fields:

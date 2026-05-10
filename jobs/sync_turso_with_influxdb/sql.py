@@ -30,7 +30,17 @@ def create_insert_statements(
     """
     statements = []
 
-    main_fields = ["temperature", "humidity", "pressure", "illumination", "uv_voltage"]
+    # TODO: there is no difference between main and optional fields here??
+    main_fields = [
+        "temperature",
+        "humidity",
+        "pressure",
+        "illumination",
+        "uv_voltage",
+        "mc_pm1_0",
+        "mc_pm2_5",
+        "mc_pm10_0",
+    ]
     optional_fields = ["dew_point", "solar_voltage", "battery_voltage"]
 
     timestamps = [int(record["timestamp"]) for record in raw_records if "timestamp" in record]
